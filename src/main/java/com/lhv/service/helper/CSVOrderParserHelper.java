@@ -31,22 +31,31 @@ public class CSVOrderParserHelper {
 		this.parser = parser;
 	}
 
-	public void parse(String filePath) throws Exception {
+	public List<OrderDto> parse(String filePath) throws Exception {
 		Reader reader = null;
 		CSVParser csvParser = null;
-		try (
-				reader = Files.newBufferedReader(Paths.get(filePath));
-				csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withIgnoreEmptyLines().withFirstRecordAsHeader());
-			){
-			
-			List<OrderDto> couponJsonList = new ArrayList<>();
+		List<OrderDto> orderDtos = null;
+		try {
+			reader = Files.newBufferedReader(Paths.get(filePath));
+			csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withIgnoreEmptyLines().withFirstRecordAsHeader());
+			orderDtos = new ArrayList<>();
 			for (CSVRecord csvRecord : csvParser) {
-				couponJsonList.add(processCSVRecord(csvRecord));
+				orderDtos.add(processCSVRecord(csvRecord));
 			}
 		} catch (Exception ex) {
 			logger.error("Error when parse coupon eod file {}", filePath, ex);
 			throw ex;
+		} finally {
+			if(reader != null) {
+				reader.close();
+				reader = null;
+			}
+			if(csvParser != null && !csvParser.isClosed()) {
+				csvParser.close();
+				csvParser = null;
+			}
 		}
+		return orderDtos;
 	}
 
 	private OrderDto processCSVRecord(CSVRecord csvRecord) throws Exception {
