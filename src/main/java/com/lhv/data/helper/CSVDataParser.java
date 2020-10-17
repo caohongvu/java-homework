@@ -1,4 +1,4 @@
-package com.lhv.service.helper;
+package com.lhv.data.helper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -16,14 +16,19 @@ public class CSVDataParser<T> {
 	T resultObject;
 
 	public T parse(Class<T> objClass, CSVRecord record) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		resultObject = objClass.getDeclaredConstructor(objClass).newInstance();
-		Field[] fields = resultObject.getClass().getDeclaredFields();
+		
+		resultObject = objClass.getConstructor().newInstance();
 
+		Field[] fields = resultObject.getClass().getDeclaredFields();
+		
 		for (Field field : fields) {
 			Class<?> fieldType = field.getType();
 			try {
-				field.setAccessible(Boolean.TRUE);
-				field.set(field.getName(), parseData(record.get(field.getName()), fieldType));
+				
+				if(record.get(field.getName())!= null) {
+					field.setAccessible(Boolean.TRUE);
+					field.set(resultObject, parseData(record.get(field.getName()), fieldType));
+				}
 			} catch (Exception ex) {
 				logger.error(ex);
 				throw ex;
