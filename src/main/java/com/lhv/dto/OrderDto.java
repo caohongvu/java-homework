@@ -1,8 +1,10 @@
 package com.lhv.dto;
 
+import com.lhv.annotations.CSVField;
+
 public class OrderDto {
 	
-	
+	@CSVField(name="order_id")
 	private Long id;
 	
 	private String item;
